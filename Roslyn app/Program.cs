@@ -9,6 +9,27 @@ namespace Roslyn_app
 {
     class Program
     {
+        static public String SuggestNewName(String parameterName, String methodName, String parameterType)
+        {
+            Console.WriteLine($"Enter parameter name for method:{methodName}({parameterType} {parameterName})");
+
+            switch (parameterName.ToLower())
+            {
+                case "x": Console.WriteLine("Suggested name: y"); break;
+                case "a": Console.WriteLine("Suggested name: b"); break;
+                case "firstname": Console.WriteLine("Suggested name: lastName"); break;
+                case "price": Console.WriteLine("Suggested name: weight"); break;
+            }
+            
+            
+            String newName = Console.ReadLine();
+            if (newName == null)
+            {
+                return "param2";
+            }
+            return newName;
+        }
+        
         static public String DuplicateParameters(String code)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
@@ -25,14 +46,16 @@ namespace Roslyn_app
                 {
                     var parameter = method.ParameterList.Parameters.First();
                     var parameterType = parameter.Type;
+                    var parameterName = parameter.Identifier.ToString();
+                    var newParameterName = SuggestNewName(parameterName, method.Identifier.ToString(), parameterType.ToString());
                     var newParameterList = SyntaxFactory.ParameterList(
                         SyntaxFactory.SeparatedList<ParameterSyntax>(new[]
                         {
                             parameter,
-                            SyntaxFactory.Parameter(SyntaxFactory.Identifier("param2")).WithType(parameterType)
+                            SyntaxFactory.Parameter(SyntaxFactory.Identifier(newParameterName)).WithType(parameterType)
                         })
                     );
-                    Console.WriteLine(parameterType);
+                    //Console.WriteLine(parameterType);
                     var newMethod = method.WithParameterList(newParameterList);
                     newMethodList.Add(newMethod);
                 }
@@ -63,6 +86,10 @@ namespace Roslyn_app
                     return 23;
                 }
                 public void MyMethod3(bool isSorted)
+                {
+                    return 23;
+                }
+                public void MyMethod4(bool firstName)
                 {
                     return 23;
                 }
