@@ -9,10 +9,49 @@ namespace Roslyn_app
 {
     class Program
     {
+        static public String DuplicateParameters(String code)
+        {
+            var tree = CSharpSyntaxTree.ParseText(code);
+            var syntaxRoot = tree.GetRoot();
+            var newSyntaxRoot = syntaxRoot;
+            var methodList = syntaxRoot.DescendantNodes().OfType<MethodDeclarationSyntax>().ToList();
+
+            var newMethodList =new List<MethodDeclarationSyntax>();
+
+
+            foreach (var method in methodList)
+            {
+                if (method.ParameterList.Parameters.Count == 1)
+                {
+                    var parameter = method.ParameterList.Parameters.First();
+                    var parameterType = parameter.Type;
+                    var newParameterList = SyntaxFactory.ParameterList(
+                        SyntaxFactory.SeparatedList<ParameterSyntax>(new[]
+                        {
+                            parameter,
+                            SyntaxFactory.Parameter(SyntaxFactory.Identifier("param2")).WithType(parameterType)
+                        })
+                    );
+                    Console.WriteLine(parameterType);
+                    var newMethod = method.WithParameterList(newParameterList);
+                    newMethodList.Add(newMethod);
+                }
+                else
+                {
+                    newMethodList.Add(method);
+                }
+            }
+
+            newSyntaxRoot = newSyntaxRoot.ReplaceNodes(
+                methodList, 
+                (original, rewritten) => newMethodList[methodList.IndexOf(original)]
+            );
+            return newSyntaxRoot.ToString();
+        }
         
         static void Main(string[] args)
         {
-            var tree = CSharpSyntaxTree.ParseText(@"
+            var code = @"
             public class MyClass
             {
                 public bool MyMethod(int x, int y)
@@ -23,34 +62,15 @@ namespace Roslyn_app
                 {
                     return 23;
                 }
-            }");
-
-            var syntaxRoot = tree.GetRoot();
-            var methodList = syntaxRoot.DescendantNodes().OfType<MethodDeclarationSyntax>().ToList();
-
-            //Console.WriteLine(MyClass.Identifier.ToString());
-            //Console.WriteLine(MethodList.ToString());
-
-            foreach (var method in methodList)
-            {
-                int count = method.ParameterList.Parameters.Count;
-                if (count == 1)
+                public void MyMethod3(bool isSorted)
                 {
-                    var parameter = method.ParameterList.Parameters.First();
-                    var parameterType=parameter.Type;
-                    var newParameterList = SyntaxFactory.ParameterList(
-                        SyntaxFactory.SeparatedList<ParameterSyntax>( new []
-                        {
-                            parameter,
-                            SyntaxFactory.Parameter(SyntaxFactory.Identifier("param2")).WithType(parameterType)
-                        })
-                    );
-                    Console.WriteLine(parameterType);
-                    var newMethod = method.WithParameterList(newParameterList);
-                    syntaxRoot = syntaxRoot.ReplaceNode(method, newMethod);
+                    return 23;
                 }
-            }
-            Console.WriteLine(syntaxRoot);
+            }";
+
+            
+            
+            Console.WriteLine(DuplicateParameters(code));
         }
     }
 }
