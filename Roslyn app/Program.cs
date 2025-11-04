@@ -9,6 +9,29 @@ namespace Roslyn_app
 {
     class Program
     {
+        static public string ReadFile(string filePath)
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    return File.ReadAllText(filePath);
+                }
+                else
+                {
+                    Console.WriteLine($"File not found: {filePath}");
+                    return string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading file: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        
+        
         static public String SuggestNewName(String parameterName, String methodName, String parameterType)
         {
             Console.WriteLine($"Enter parameter name for method:{methodName}({parameterType} {parameterName})");
@@ -74,28 +97,9 @@ namespace Roslyn_app
         
         static void Main(string[] args)
         {
-            var code = @"
-            public class MyClass
-            {
-                public bool MyMethod(int x, int y)
-                {
-                    return true;
-                }
-                public int MyMethod2(int x)
-                {
-                    return 23;
-                }
-                public void MyMethod3(bool isSorted)
-                {
-                    return 23;
-                }
-                public void MyMethod4(bool firstName)
-                {
-                    return 23;
-                }
-            }";
-
             
+
+            var code= ReadFile("../../../../Roslyn app/Example.cs");
             
             Console.WriteLine(DuplicateParameters(code));
         }
