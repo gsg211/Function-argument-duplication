@@ -30,7 +30,12 @@ namespace Roslyn_app
             }
         }
 
-        
+        static string GetProjectRoot()
+        {
+            var exePath = AppContext.BaseDirectory;
+            var projectRoot = Path.GetFullPath(Path.Combine(exePath, "../../../../")); 
+            return projectRoot;
+        }
         
         static public String SuggestNewName(String parameterName, String methodName, String parameterType)
         {
@@ -97,11 +102,22 @@ namespace Roslyn_app
         
         static void Main(string[] args)
         {
-            
+            try
+            {
+                string projectRoot = GetProjectRoot();
+                Console.Write("Name of file: ");
+                string fileName = Console.ReadLine();
+                string filePath = Path.Combine(projectRoot, "Roslyn app", fileName);
 
-            var code= ReadFile("../../../../Roslyn app/Example.cs");
+                var code = ReadFile(filePath);
+                Console.WriteLine(DuplicateParameters(code));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
             
-            Console.WriteLine(DuplicateParameters(code));
         }
     }
 }
